@@ -1,0 +1,179 @@
+---
+title: "BREWERY ANALYSIS"
+author: "Casey Martinez & Asha Saxena"
+date: "October 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:\\Users\\ashas\\github\\SMU\\Case Study 1')
+```
+## INTRODUCTION: 
+
+The global craft beer market size was valued at USD 85.02 billion and is expected to witness significant growth over the forecast period owing to the increasing penetration of the product.
+
+As the craft beer segment of the beer market continues to grow, Beverage Industry takes an in-depth look at the segment and its future. 
+
+#### We are tasked to analyze the beer and breweries data for its Alcoholic Content (ABV) and Bitterness Level(IBU) and respond to the BIG question:
+####**What is the rising consumer preference expected to be the key aspects of the market growth?**
+
+
+### SCOPE & PHASES
+
+Scope of this project is as follows:
+  1) Analyzing the data set provided for breweries and beer in United States
+  2) Cleaning the Data
+  3) Computing the data set 
+  4) Evaluating the statistical results
+  5) Conclusion 
+
+
+## PHASE 1: ANALYZING THE DATA
+```{r,echo=TRUE}
+library(ggplot2)
+library(data.table)
+library(dplyr)
+library(ggthemes)
+
+source('Analysis/makefile.R')
+```
+### Q1. How many breweries are present in each state?
+
+We found that the data set contains 50 states in additon to Washington DC, which makes it total of 51 states enteries. 
+```{r,echo=TRUE,fig.width=15,fig.height=5}
+#question 1
+q1 <- brew %>% group_by(brew$State) %>% summarize(TotalBreweries = n())
+q1 <- as.data.frame(q1)
+
+q1_plot <- ggplot(data = q1, aes(x = as.factor(q1$`brew$State`),y = TotalBreweries)) + 
+  geom_col(color = 'red',fill = 'pink') +
+  labs(y = 'N',x = "State") +
+  ggtitle('Total Number of Breweries per State') +
+  theme_economist() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(q1_plot)
+
+```
+
+### Q2. Merge beer data with the breweries data. Print the first Six observations and the last six observations to check the merged file.
+
+We then merged the beer and breweries data set and print the first six and the last six observations to confirm the merged file.
+
+
+## PHASE 2: DATA CLEANZING
+```{r,echo=TRUE}
+#Question 2
+head(merged_data, 6)
+tail(merged_data, 6)
+```
+### Q3. Report the number of NA's in each column.
+
+First step in cleaning the data is to check how many NA values we have. For ABV we find 62 and for IBU 1005 NA values.All other columns have no NA values. 
+
+```{r,echo=TRUE}
+q3a <- sum(is.na(merged_data$ABV))
+q3b <- sum(is.na(merged_data$IBU))
+print(paste('The number of NA values for column ABV is:',q3a))
+print(paste('The number of NA values for column IBU is:',q3b))
+print('All other columns have no NA values')
+```
+
+## PHASE 3: COMPUTATION 
+
+### Q4. Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+After merging and cleaning the data, we looked at the median alcohol content and international bitterness unit for each state.
+
+Please see attached the bar chart to compare.
+
+Note: For **median alcohol content** we removed 18 rows with missing values
+Note: For **international bitterness unit** we removed 47 rows withmissing values
+
+```{r,echo=TRUE,fig.width=15,fig.height=5}
+
+#question4
+q4 <- merged_data %>% group_by(merged_data$State) %>% summarize(median_ABV = median(ABV), median_IBU = median(IBU))
+q4 <- as.data.frame(q4)
+setnames(q4, "merged_data$State", "State")
+
+#bar chart for median_ABV
+q4a <- ggplot(data = q4, aes(x = State,y = median_ABV)) + 
+  geom_col(color = 'red',fill = 'pink') +
+  labs(y = 'Median ABV',title = 'Median Alcohol Content') +
+  theme_economist() +
+  theme(plot.title = element_text(hjust = 0.5))
+               
+#bar chart for median_IBU
+q4b <- ggplot(data = q4, aes(x = State,y = median_IBU)) + 
+  geom_col(color = 'blue',fill = 'yellow') +
+  labs(y = 'Median IBU',title = 'Median International Bitterness Content') +
+  theme_economist() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(q4a)
+print(q4b)
+```
+
+
+### Q5. Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer?
+
+We then looked at the data to check which state has the maximum alcoholic (ABV) beer and which state has the most bitter (IBU) beer.
+
+We found **COLORADO** to be the state for maximum alcoholic (ABV) beer and the most bitter (IBU) beer.
+
+
+```{r,echo=TRUE}
+q5a <- merged_data$State[which.max(merged_data$ABV)]
+print(paste("The state with the most alcholic beer is:",as.character(q5a)))
+
+q5b <- merged_data$State[which.max(merged_data$ABV)]
+print(paste("The state with the most BITTER beer is:",as.character(q5b)))
+```
+
+
+## PHASE 4: EVALUATING STATISTICAL RESULTS
+
+### Q6. Summary statistics for the ABV variable.
+
+Our goal was now to see the summary statistic for ABV variable. We found Min, Max to be 0.001 to 0.128, which show a nice range for ABV by the 51 state entries.
+Mean, median measures are 0.059, 0.056 and the NA's in the ABV column are 62
+
+```{r,echo=TRUE}
+#question 6
+q6 <- summary(merged_data$ABV)
+print(q6)
+```
+
+
+## PHASE 5: CONCLUSION
+
+### Q7. Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.
+
+By plotting our data on a scatter plot, We see here a linear relationship between the bitterness of the beer and its alcoholic content. 
+
+For lower bitterness content and low alcoholic content, we see a concentrated population, which indicates the popular beer/beweries have low IBU/ABV content, whereas higher the bitterness and higher the alcohol content lower the concentration. We see sparadic spread of data in that region of the plot.
+
+Per our statistical calculations, we find adjusted R-squared to be 0.4493, indicates a strong linear relationship between the two variable defined here. 
+
+
+```{r,echo=TRUE,fig.width=15,fig.height=5}
+#scatter plot
+q7 <- ggplot(data = merged_data, aes(x = ABV,y = IBU)) + 
+  geom_point() +
+  labs(x = 'ABV', y = 'IBU',title = 'International Bitterness Content vs. Alcoholic Content') +
+  theme_economist() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_smooth(method = 'lm') +
+  geom_vline(xintercept = 0.099,color = 'red')
+  
+print(q7)  
+
+#linear reegression model
+q7model <- lm(IBU ~ ABV, merged_data)
+summary(q7model)
+```
+
+##**In conclusion, we can state that the rising consumer preference is for flavored and low ABV beer is expected to be the key aspects of the market growth.**
+
